@@ -336,6 +336,11 @@ makeinstall_target() {
         ARCH=arm64 scripts/mkimg --dtb ${DEVICE_DTB[0]}.dtb
         if [ ${#DEVICE_DTB[@]} -gt 1 ]; then
           ARCH=arm64 scripts/mkmultidtb.py ${PKG_SOC}
+        else
+          # Single-DTB device: u-boot expects 'rk-kernel.dtb' in resource.img
+          cp arch/arm64/boot/dts/rockchip/${DEVICE_DTB[0]}.dtb rk-kernel.dtb
+          scripts/resource_tool rk-kernel.dtb
+          rm rk-kernel.dtb
         fi
         cp -v resource.img ${INSTALL}/usr/share/bootloader
         ARCH=${TARGET_ARCH}
