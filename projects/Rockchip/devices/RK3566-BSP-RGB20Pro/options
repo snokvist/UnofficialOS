@@ -163,6 +163,3 @@
     EMULATION_DEVICE="no"
     DEBUG_PACKAGES="no"
     ENABLE_32BIT="false"
-
-  # Fixed root password for SSH access (overrides distribution "system generated")
-    ROOT_PASSWORD="unofficialos"
