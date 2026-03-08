@@ -71,33 +71,47 @@ Switched to `https://github.com/HermanChen/mpp` at a newer commit with SHA256.
 
 ## Kernel (`packages/kernel/linux/`)
 
-Two changes:
+One change:
 
-**1. Add RGB20Pro to kernel case**
+**Add RGB20Pro to kernel case**
 ```
 RK3566-BSP|RK3566-BSP-RGB20Pro)
 ```
 Both devices share the same kernel tree (`RetroGFX/rk356x-kernel`).
 
-**2. Fix `resource.img` for single-DTB devices**
+---
 
-Original code always ran `mkmultidtb.py` (which creates a multi-DTB `resource.img`
-with `rk-kernel.dtb` as the default). We added a guard so `mkmultidtb.py` is only
-called when `DEVICE_DTB` has more than one entry.
+## Boot fix: `TRUST_LABEL` and DTB loading
 
-**Problem**: Rockchip BSP u-boot specifically looks for `rk-kernel.dtb` inside
-`resource.img`. When `mkmultidtb.py` is skipped, `scripts/mkimg` creates a
-`resource.img` with the DTB stored under its original filename
-(`rk3566-rgb20pro-linux.dtb`), which u-boot cannot find → boots without DTB →
-no display, no peripherals.
+**Root cause** — `TRUST_LABEL="resource"` (copied from the multi-DTB `RK3566-BSP`)
+with a single DTB causes extlinux.conf to use `FDTDIR /`. With this directive,
+u-boot auto-selects a DTB by scanning the FAT partition for a file whose name
+matches a board compatible string (e.g. `rockchip,rk3566.dtb`). The actual file
+`rk3566-rgb20pro-linux.dtb` does not match any board compatible string, so no DTB
+is loaded → kernel boots with no device tree → screen dark, no peripherals.
 
-**Fix** — for single-DTB builds, manually replicate what `mkmultidtb.py` does:
+**Reference**: `RK3566-BSP-X55` is a working single-DTB Rockchip device that uses
+`TRUST_LABEL="trust"`, producing `FDT /rk3566-evb2-lp4x-v10-linux.dtb` in
+extlinux.conf (explicit path, not FDTDIR).
+
+The `bootloader/install` logic:
 ```bash
-cp arch/arm64/boot/dts/rockchip/${DEVICE_DTB[0]}.dtb rk-kernel.dtb
-scripts/resource_tool rk-kernel.dtb
-rm rk-kernel.dtb
+# TRUST_LABEL="resource" OR multi-DTB → FDTDIR /
+# TRUST_LABEL="trust" AND single DTB  → FDT /<dtbname>.dtb
+if [[ "${TRUST_LABEL}" = "resource" || "${#DEVICE_DTB[@]}" -gt 1 ]]; then
+  FDTMODE="FDTDIR /"
+else
+  FDTMODE="FDT /${DEVICE_DTB[0]}.dtb"
+fi
 ```
-This overwrites the `resource.img` with one containing `rk-kernel.dtb` as expected.
+
+**Fix** — changed `TRUST_LABEL="resource"` → `TRUST_LABEL="trust"` in device
+options. With this:
+- `extlinux.conf` uses `FDT /rk3566-rgb20pro-linux.dtb` (explicit path)
+- No `resource.img` is created (linux/package.mk skips the `resource` branch)
+- Partition 2 (sector 24576) remains empty — fine for rk356x (BL31 is embedded
+  in `u-boot.itb`, no separate trust/resource partition needed)
+- The DTB is installed to the FAT partition root by the standard DTB copy loop
 
 ---
 
