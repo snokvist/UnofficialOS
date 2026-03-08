@@ -3,9 +3,10 @@
 # Copyright (C) 2023 JELOS (https://github.com/JustEnoughLinuxOS)
 
 PKG_NAME="cpio"
-PKG_VERSION="2.14"
+PKG_VERSION="2.15"
+PKG_SHA256="efa50ef983137eefc0a02fdb51509d624b5e3295c980aa127ceee4183455499e"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.gnu.org/software/cpio/"
-PKG_URL="http://ftp.gnu.org/gnu/cpio/${PKG_NAME}-${PKG_VERSION}.tar.gz"
+PKG_URL="https://ftp.gnu.org/gnu/cpio/${PKG_NAME}-${PKG_VERSION}.tar.gz"
 PKG_DEPENDS_HOST="toolchain"
 PKG_LONGDESC="A program to manage archives of files."

@@ -20,7 +20,7 @@ case ${DEVICE} in
     PKG_URL="https://github.com/armbian/linux-rockchip/archive/${PKG_VERSION}.tar.gz"
     PKG_GIT_CLONE_BRANCH="rk-5.10-rkr6"
   ;;
-  RK3566-BSP)
+  RK3566-BSP|RK3566-BSP-RGB20Pro)
     PKG_URL="https://github.com/RetroGFX/rk356x-kernel.git"
     PKG_VERSION="bf340e252cd15e5857560b10e28be1746b0d0260"
     GET_HANDLER_SUPPORT="git"
@@ -334,7 +334,9 @@ makeinstall_target() {
       . ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/options
       if [ "${TRUST_LABEL}" = "resource" ]; then
         ARCH=arm64 scripts/mkimg --dtb ${DEVICE_DTB[0]}.dtb
-        ARCH=arm64 scripts/mkmultidtb.py ${PKG_SOC}
+        if [ ${#DEVICE_DTB[@]} -gt 1 ]; then
+          ARCH=arm64 scripts/mkmultidtb.py ${PKG_SOC}
+        fi
         cp -v resource.img ${INSTALL}/usr/share/bootloader
         ARCH=${TARGET_ARCH}
       fi

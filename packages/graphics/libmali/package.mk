@@ -11,6 +11,7 @@ PKG_VERSION="0c1c1b8e3a687fd10df38935c4dff9ab90285a09"
 MALI_LIB_VERSION="1.9.0"
 GET_HANDLER_SUPPORT="git"
 PKG_DEPENDS_TARGET="toolchain libdrm"
+PKG_TOOLCHAIN="meson"
 PKG_LONGDESC="OpenGL ES user-space binary for the ARM Mali GPU family"
 PKG_PATCH_DIRS+="${DEVICE}"
 
