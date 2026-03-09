@@ -1,0 +1,7 @@
+#!/bin/sh
+# Set a fixed root password for SSH access.
+# This runs before common/007-rootpw which checks these settings.
+. /etc/profile.d/001-functions
+
+set_setting rotate.root.password 0
+set_setting root.password unofficialos
